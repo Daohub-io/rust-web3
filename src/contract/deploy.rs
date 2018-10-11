@@ -8,7 +8,7 @@ use api::{Eth, Namespace};
 use confirm;
 use contract::tokens::Tokenize;
 use contract::{Contract, Options};
-use types::{Address, Bytes, TransactionRequest};
+use types::{Address, Bytes, TransactionRequest, TransactionReceipt};
 use Transport;
 
 pub use contract::error::deploy::{Error, ErrorKind};
@@ -93,7 +93,7 @@ pub struct PendingContract<T: Transport> {
 }
 
 impl<T: Transport> Future for PendingContract<T> {
-    type Item = Contract<T>;
+    type Item = (Contract<T>, TransactionReceipt);
     type Error = Error;
 
     fn poll(&mut self) -> Poll<Self::Item, Self::Error> {
@@ -102,7 +102,7 @@ impl<T: Transport> Future for PendingContract<T> {
         let abi = self.abi.take().expect("future polled after ready; qed");
 
         match receipt.contract_address {
-            Some(address) => Ok(Async::Ready(Contract::new(eth, address, abi))),
+            Some(address) => Ok(Async::Ready((Contract::new(eth, address, abi), receipt))),
             None => Err(ErrorKind::ContractDeploymentFailure(receipt.transaction_hash).into()),
         }
     }
