@@ -319,6 +319,7 @@ impl_fixed_types!(4);
 impl_fixed_types!(5);
 impl_fixed_types!(8);
 impl_fixed_types!(16);
+impl_fixed_types!(24);
 impl_fixed_types!(32);
 impl_fixed_types!(64);
 impl_fixed_types!(128);
