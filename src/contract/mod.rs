@@ -12,10 +12,12 @@ use std::{collections::HashMap, hash::Hash, time};
 pub mod deploy;
 mod error;
 mod result;
+mod token_result;
 pub mod tokens;
 
 pub use crate::contract::error::Error;
 pub use crate::contract::result::{CallFuture, QueryResult};
+pub use crate::contract::token_result::{QueryTokensResult};
 
 /// Contract Call/Query Options
 #[derive(Default, Debug, Clone, PartialEq)]
@@ -245,6 +247,46 @@ impl<T: Transport> Contract<T> {
                     block.into(),
                 );
                 QueryResult::new(result, function.clone())
+            })
+            .unwrap_or_else(Into::into)
+    }
+
+
+    /// Call constant function and return tokens
+    pub fn query_tokens<A, B, P>(
+        &self,
+        func: &str,
+        params: P,
+        from: A,
+        out_function: &ethabi::Function,
+        options: Options,
+        block: B,
+    ) -> QueryTokensResult<T::Out>
+    where
+        A: Into<Option<Address>>,
+        B: Into<Option<BlockNumber>>,
+        P: Tokenize,
+    {
+        self.abi
+            .function(func)
+            .and_then(|function| {
+                function
+                    .encode_input(&params.into_tokens())
+                    .map(|call| (call, function))
+            })
+            .map(|(call, function)| {
+                let result = self.eth.call(
+                    CallRequest {
+                        from: from.into(),
+                        to: self.address,
+                        gas: options.gas,
+                        gas_price: options.gas_price,
+                        value: options.value,
+                        data: Some(Bytes(call)),
+                    },
+                    block.into(),
+                );
+                QueryTokensResult::new(result, out_function.clone())
             })
             .unwrap_or_else(Into::into)
     }

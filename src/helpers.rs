@@ -9,6 +9,40 @@ use serde_json;
 
 use crate::error::Error;
 
+
+// /// Value-decoder future.
+// /// Takes any type which is deserializable from rpc::Value and a future which yields that
+// /// type, and yields the deserialized value
+// #[derive(Debug)]
+// pub struct CallTokensFuture<F> {
+//     inner: F,
+// }
+
+// impl<F> CallTokensFuture<F> {
+//     /// Create a new CallFuture wrapping the inner future.
+//     pub fn new(inner: F) -> Self {
+//         CallTokensFuture {
+//             inner,
+//         }
+//     }
+// }
+
+// impl<F> Future for CallTokensFuture<F>
+// where
+//     F: Future<Item = rpc::Value, Error = Error>,
+// {
+//     type Item = Vec<ethabi::Token>;
+//     type Error = Error;
+
+//     fn poll(&mut self) -> Poll<Vec<ethabi::Token>, Error> {
+//         match self.inner.poll() {
+//             Ok(Async::Ready(x)) => serde_json::from_value(x).map(Async::Ready).map_err(Into::into),
+//             Ok(Async::NotReady) => Ok(Async::NotReady),
+//             Err(e) => Err(e),
+//         }
+//     }
+// }
+
 /// Value-decoder future.
 /// Takes any type which is deserializable from rpc::Value and a future which yields that
 /// type, and yields the deserialized value
